@@ -1,11 +1,14 @@
 name: LDPC
-
+channels:
+  - defaults
 dependencies:
+    - python>=3.10
     - numpy>=1.15.4
     - scipy>=1.0.1
     - pytest
     - matplotlib>=2.0.0
     - numba
+    - pip
     - pip:
         - pyldpc
         - scikit-commpy>=0.7.0

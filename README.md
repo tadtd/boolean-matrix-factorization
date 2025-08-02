@@ -1,4 +1,4 @@
-# Boolean Matrix Factorization (BMF) Library
+# Boolean Matrix Factorization (BMF)
 
 A Python library for Boolean Matrix Factorization studying and implementation. This project provides a modular framework for studying and comparing different BMF algorithms.
 
@@ -59,12 +59,10 @@ LICENSE
 
 ## Contributing
 
-When adding new algorithms:
-1. Inherit from [`BMFAlgorithm`](BMF/models/base.py)
-2. Implement required abstract methods
-3. Return [`BMFResult`](BMF/utils.py) objects
-4. Add comprehensive docstrings
+Contributions are welcome! If you'd like to contribute to this project:
 
+1. **Issues**: Feel free to open an issue to report bugs, request features, or discuss improvements
+2. **Pull Requests**: Submit a pull request with your changes.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

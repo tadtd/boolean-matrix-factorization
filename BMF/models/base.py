@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from ..utils import BMFResult
 
 class BMFAlgorithm(ABC):
   '''
@@ -16,7 +17,7 @@ class BMFAlgorithm(ABC):
     self.params = kwargs
   
   @abstractmethod
-  def fit(self, C):
+  def fit(self, C: np.ndarray) -> BMFResult:
     '''
     Fit the model to the data.
     Args:
@@ -26,7 +27,6 @@ class BMFAlgorithm(ABC):
     '''
     pass
   
-  @property
   @abstractmethod
   def name(self) -> str:
     ''' 

@@ -1,6 +1,6 @@
 import numpy as np
-from base import BMFAlgorithm
-from BMF.utils import utils
+from .base import BMFAlgorithm
+from ..utils import utils, BMFResult
 import time
 
 class AssoAlgorithm(BMFAlgorithm):
@@ -8,7 +8,7 @@ class AssoAlgorithm(BMFAlgorithm):
   Implementation of the ASSO algorithm for Boolean matrix factorization
   '''
 
-  def __init__(self, k: int,
+  def __init__(self, rank: int,
                 tau: float,
                 wp: float = 1.0, 
                 wn: float = 1.0
@@ -21,11 +21,11 @@ class AssoAlgorithm(BMFAlgorithm):
       wp: Weight for positive matches
       wn: Weight for negative matches (penalty for false positives)
     '''
-    super().__init__(k, tau=tau, wp=wp, wn=wn)
+    super().__init__(rank=rank, tau=tau, wp=wp, wn=wn)
     self.tau = tau
     self.wp = wp
     self.wn = wn
-  
+
   @property
   def name(self) -> str:
     return 'ASSO'
@@ -34,54 +34,113 @@ class AssoAlgorithm(BMFAlgorithm):
     '''
     Compute the cover score for current factorization
     Args:
-      B, S: Factor matrix
+      B, S: Factor matrices
       C: Original matrix
     Returns:
       Cover score
     '''
     appr = utils.boolean_product(S, B)
-    positve_score = self.wp * np.sum((C==1)&(appr==1))
-    negative_penalty = self.wp * np.sum((C==0)&(appr==1))
-    return positve_score - negative_penalty
+    positive_score = self.wp * np.sum((C == 1) & (appr == 1))
+    negative_penalty = self.wn * np.sum((C == 0) & (appr == 1))
+    return positive_score - negative_penalty
   
-  def _build_candidate_matrix(self, C:np.ndarray) -> np.ndarray:
+  def _build_candidate_matrix(self, C: np.ndarray) -> np.ndarray:
     '''
     Build candidate matrix A based on column similarity.
     Args:
       C: Input matrix
     Returns:
-      Candidate matrix A
+      Candidate matrix A (same shape as C)
     '''
     n, m = C.shape
     A = np.zeros((n, m), dtype=int)
 
-    for i in range(n):
-      for j in range(m):
-        similarity = utils.cosine_similarity(C[:, i], C[:, j])
+    for j in range(m):
+      for k in range(m):
+        similarity = utils.cosine_similarity(C[:, j], C[:, k])
         if similarity >= self.tau:
-          A[i, j] = 1
+          A[j, k] = 1
     
     return A
   
-  def fit(self, C: np.ndarray) -> np.ndarray:
+  def fit(self, C: np.ndarray) -> BMFResult:
     '''
-    Fit Asso algorithm to the input matrix
+    Fit ASSO algorithm to the input matrix
     Args:
-      C: Input matrix (n [by] m)
+      C: Input matrix (n x m)
     Returns:
-
+      BMFResult object containing the factorization C = S \circ B
     '''
     start_time = time.time()
+    k = self.rank
 
     # Validate input
     self._validate_input(C)
 
     n, m = C.shape
 
-    # Initialize result matrices
-    B = np.zeros((self.rank, m), dtype=int)
-    S = np.zeros((n, self.rank), dtype=int)
+    # Initialize result matrices - S is n x k, B is k x m
+    S = np.zeros((n, k), dtype=int)
+    B = np.zeros((k, m), dtype=int)
 
     # Build candidate matrix
     A = self._build_candidate_matrix(C)
     
+    # Track which columns have been used
+    used_columns = set()
+    
+    for i in range(k):
+      # Select the best candidate column based on cover score
+      best_col = -1
+      best_score = -np.inf
+      
+      for j in range(m):
+        if j in used_columns or A[:, j].sum() == 0:
+          continue
+          
+        # Create temporary matrices to test this candidate
+        S_temp = S.copy()
+        B_temp = B.copy()
+        S_temp[:, i] = A[:, j]
+        B_temp[i, :] = C[:, j]  # Use original column, not candidate
+        
+        score = self._compute_cover_score(B_temp, S_temp, C)
+        if score > best_score:
+          best_score = score
+          best_col = j
+      
+      if best_col != -1:
+        S[:, i] = A[:, best_col]
+        B[i, :] = C[:, best_col]  # Use original column
+        used_columns.add(best_col)
+    
+    # Compute reconstruction
+    reconstruction = utils.boolean_product(S, B)
+    # Compute error
+    error = np.sum(np.abs(C - reconstruction))
+    # Compute convergence time
+    convergence_time = time.time() - start_time
+    # Check convergence (using error threshold)
+    converged = error == 0  # For boolean matrices, perfect reconstruction is possible
+    
+    # Store the factor matrices
+    self.S = S
+    self.B = B
+    
+    # Create result object
+    result = BMFResult(B=S, C=B, original_matrix=C, error=error,
+                       iterations=self.rank, convergence_time=convergence_time,
+                       converged=converged, metadata={'tau': self.tau,
+                                                      'wp': self.wp,
+                                                      'wn': self.wn})
+    return result
+  
+  def reconstruct(self) -> np.ndarray:
+    '''
+    Reconstruct the original data matrix using learned factors.
+    Returns:
+      Reconstructed data matrix
+    '''
+    if not hasattr(self, 'S') or not hasattr(self, 'B'):
+      raise ValueError('Model must be fitted before reconstruction')
+    return utils.boolean_product(self.S, self.B)

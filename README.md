@@ -2,7 +2,7 @@
 
 A Python-based project for studying and experimenting with Boolean Matrix Factorization. It provides a modular framework for exploring and comparing different BMF algorithms.
 
-In addition, this repository aims to reproduce the results of the paper "Boolean Matrix Factorization and Noisy Completion via Message Passing" by \textbf{Siamak Ravanbakhsh, Barnabás Póczos, and Russell Greiner.}
+In addition, this repository aims to reproduce the results of the paper "Boolean Matrix Factorization and Noisy Completion via Message Passing" by **Siamak Ravanbakhsh, Barnabás Póczos, and Russell Greiner.**
 
 ## Overview
 

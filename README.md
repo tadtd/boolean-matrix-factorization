@@ -73,6 +73,6 @@ This project is intended for research and educational purposes.
 
 For research collaboration or questions about implementation details, feel free to contact me via email: [dotiendat1725@gmail.com](mailto:dotiendat1725@gmail.com)
 
----
+<!-- ---
 
-*This library serves as a foundation for Boolean Matrix Factorization research and can be extended for various applications in data mining, pattern recognition, and optimization.*
+*This library serves as a foundation for Boolean Matrix Factorization research and can be extended for various applications in data mining, pattern recognition, and optimization.* -->

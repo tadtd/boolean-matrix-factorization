@@ -1,21 +1,18 @@
-# Makefile for Boolean Matrix Factorization project
-# Cross-platform: Works with Linux, macOS, and Windows (with WSL or make installed)
-
 # Detect operating system
 ifeq ($(OS),Windows_NT)
-    # Windows paths
-    VENV_BIN = $(VENV_NAME)/Scripts
-    ACTIVATE_CMD = $(VENV_NAME)\Scripts\activate.bat
-    RM_CMD = rmdir /s /q
-    MKDIR_CMD = if not exist
-    EXIST_CMD = if exist
+	# Windows paths
+	VENV_BIN = $(VENV_NAME)/Scripts
+	ACTIVATE_CMD = $(VENV_NAME)\Scripts\activate.bat
+	RM_CMD = rmdir /s /q
+	MKDIR_CMD = if not exist
+	EXIST_CMD = if exist
 else
-    # Unix-like systems (Linux, macOS)
-    VENV_BIN = $(VENV_NAME)/bin
-    ACTIVATE_CMD = source $(VENV_NAME)/bin/activate
-    RM_CMD = rm -rf
-    MKDIR_CMD = test -d
-    EXIST_CMD = test -d
+	# Unix-like systems (Linux, macOS)
+	VENV_BIN = $(VENV_NAME)/bin
+	ACTIVATE_CMD = source $(VENV_NAME)/bin/activate
+	RM_CMD = rm -rf
+	MKDIR_CMD = test -d
+	EXIST_CMD = test -d
 endif
 
 # Virtual environment settings

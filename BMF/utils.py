@@ -166,10 +166,10 @@ class BMFResult:
   def __str__(self) -> str:
     '''String representation of BMF result.'''
     summary = self.summary()
-    return (f'BMFResult(shape={summary['original_shape']}, '
-            f'rank={summary['rank']}, error={summary['error']:.4f}, '
-            f'iterations={summary['iterations']}, '
-            f'converged={summary['converged']})')
+    return (f"BMFResult(shape={summary['original_shape']}, "
+            f"rank={summary['rank']}, error={summary['error']:.4f}, "
+            f"iterations={summary['iterations']}, "
+            f"converged={summary['converged']})")
   
   def __repr__(self) -> str:
     '''Detailed string representation of BMF result.'''

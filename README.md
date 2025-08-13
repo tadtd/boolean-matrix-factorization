@@ -29,34 +29,6 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-## Project Structure
-
-```
-BMF/                          # Main library package
-├── __init__.py              # Package initialization
-├── utils.py                 # Utility functions and BMFResult class
-└── models/                  # Algorithm implementations
-    ├── __init__.py
-    ├── base.py             # Abstract base class
-    ├── asso.py             # ASSO algorithm
-    └── greedy.py           # Greedy BMF algorithm
-
-problems/                    # Related optimization problems
-├── set-covering/           # Set covering problem implementations
-│   ├── greedy.py          # Greedy set covering
-│   ├── lp.py              # Linear programming approach
-│   └── main.py
-└── LDPC/                   # LDPC codes (related research)
-    ├── LDPC.py            # LDPC implementation
-    ├── main.py
-    ├── environment.yml    # Conda environment
-    └── README.md
-
-test.py                     # Example usage and testing
-requirements.txt            # Python dependencies
-LICENSE                     
-```
-
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to this project:

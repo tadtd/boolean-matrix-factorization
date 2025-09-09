@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Set, Any
+import numpy as np
 
 Biclique = Tuple[Set[Any], Set[Any]]
 
@@ -9,9 +10,9 @@ class BicliqueCoverSolver(ABC):
   Subclasses must implement `solve()`
   '''
   def __init__(self, 
-               left_nodes: List[Any], 
-               right_nodes: List[Any], 
-               edges: List[Tuple[Any, Any]]):
+               left_nodes: List[Any] = [], 
+               right_nodes: List[Any] = [], 
+               edges: List[Tuple[Any, Any]] = []):
     '''
     Params:
       - left_nodes: List of nodes on the left side 
@@ -31,6 +32,20 @@ class BicliqueCoverSolver(ABC):
       self.neighbors_left[u].add(v)
       self.neighbors_right[v].add(u)
 
+  @classmethod
+  def from_matrix(cls, D: np.ndarray) -> 'BicliqueCoverSolver':
+    m, n = D.shape
+
+    left_nodes = [f'T{i}' for i in range(m)]
+    right_nodes = [f'I{i}' for i in range(n)]
+
+    edges = []
+    for i in range(m):
+      for j in range(n):
+        if D[i, j] == 1:
+          edges.append(left_nodes[i], right_nodes[j])
+    
+    return cls(left_nodes, right_nodes)
   
   @abstractmethod
   def solve(self) -> List[Biclique]:

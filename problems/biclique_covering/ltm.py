@@ -58,6 +58,7 @@ class LTM(BicliqueCoverSolver):
     pruned_db_dict = db.db.copy()
     while True:
       changed = False
+      # tid_sizes: {tid -> number of items in that transaction}
       tid_sizes: Dict[int, int] = {}
       all_tids_in_db = set.union(*pruned_db_dict.values()) if pruned_db_dict else set()
 
@@ -111,7 +112,7 @@ class LTM(BicliqueCoverSolver):
           pruned_db_dict[item_i].difference_update(tids_to_remove_from_item)
           if not pruned_db_dict[item_i]:
             del pruned_db_dict[item_i]
-            
+
       # if nothing changed in the full loop, exit
       if not changed:
         break

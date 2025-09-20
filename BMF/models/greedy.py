@@ -3,7 +3,7 @@ from .base import BMFAlgorithm
 from ..utils import utils, BMFResult
 import time
 
-class GreedyBMF(BMFAlgorithm):
+class Greedy(BMFAlgorithm):
   '''
   Greedy BMF algorithm implementation.
   '''
@@ -13,15 +13,16 @@ class GreedyBMF(BMFAlgorithm):
     Args:
       rank: The rank (number of latent factors) for the BMF.
     '''
-    super().__init__(rank=rank)
+    super().__init__()
+    self.rank = rank
     self.B = None
     self.C = None
   
   @property
   def name(self) -> str:
-    return 'GreedyBMF'
+    return 'Greedy'
   
-  def fit(self, X: np.ndarray) -> BMFResult:
+  def solve(self, X: np.ndarray) -> BMFResult:
     '''
     Fit the model to the data using greedy approach.
     Args:
@@ -93,13 +94,3 @@ class GreedyBMF(BMFAlgorithm):
                        convergence_time=convergence_time, 
                        converged=converged)
     return result
-  
-  def reconstruct(self) -> np.ndarray:
-    '''
-    Reconstruct the original data matrix.
-    Returns:
-      Reconstructed data matrix.
-    '''
-    if self.B is None or self.C is None:
-      raise ValueError("Model must be fitted before reconstruction")
-    return utils.boolean_product(self.B, self.C)

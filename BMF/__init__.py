@@ -14,8 +14,7 @@ Or import everything:
 '''
 
 # Make submodules available at package level (numpy-style)
-from . import models as models
-from . import utils as _utils
+from . import models as models, utils as _utils
 
 # Utility access
 utils = _utils.utils
@@ -24,8 +23,8 @@ boolean_product = utils.boolean_product
 cosine_similarity = utils.cosine_similarity
 
 # For backward compatibility
-AssoAlgorithm = models.AssoAlgorithm
-GreedyBMF = models.GreedyBMF
+AssoAlgorithm = models.Asso
+GreedyBMF = models.Greedy
 BMFAlgorithm = models.BMFAlgorithm
 
 # Package metadata
@@ -43,8 +42,9 @@ __all__ = [
   'cosine_similarity',
 
   # Direct classes (backward compatibility)
-  'AssoAlgorithm',
-  'GreedyBMF', 
+  'Asso',
+  'Greedy', 
+  'GreConD',
   'BMFAlgorithm',
   
   # Metadata

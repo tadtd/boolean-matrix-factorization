@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from ..utils import BMFResult
+from ..utils import BMFResult, utils
 
 class BMFAlgorithm(ABC):
   '''
@@ -13,11 +13,12 @@ class BMFAlgorithm(ABC):
     Args:
       **kwargs: Algorithm-specific parameters.
     '''
-    self.rank = rank
+    self.B = None
+    self.C = None
     self.params = kwargs
   
   @abstractmethod
-  def fit(self, C: np.ndarray) -> BMFResult:
+  def solve(self, C: np.ndarray) -> BMFResult:
     '''
     Fit the model to the data.
     Args:
@@ -34,14 +35,15 @@ class BMFAlgorithm(ABC):
     '''
     pass
 
-  @abstractmethod
-  def reconstruct(self):
+  def reconstruct(self, B: np.ndarray, C: np.ndarray) -> np.ndarray:
     '''
     Reconstruct the original data matrix.
     Returns:
       Reconstructed data matrix.
     ''' 
-    pass
+    if self.B is None or self.C is None:
+      raise ValueError('Model must be fitted before reconstruction')
+    return utils.boolean_product(self.B, self.C)
 
   def _validate_input(self, A: np.ndarray):
     '''
@@ -55,6 +57,3 @@ class BMFAlgorithm(ABC):
     
     if not np.all((A==0) | (A==1)):
       raise ValueError('Input must be a boolean matrix')
-
-    if self.rank <= 0 or self.rank > min(A.shape):
-      raise ValueError(f'Invalid rank k = {self.rank} for matrix shape {A.shape}')

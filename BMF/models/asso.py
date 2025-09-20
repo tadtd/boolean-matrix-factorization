@@ -3,15 +3,16 @@ from .base import BMFAlgorithm
 from ..utils import utils, BMFResult
 import time
 
-class AssoAlgorithm(BMFAlgorithm):
+class Asso(BMFAlgorithm):
   '''
   Implementation of the ASSO algorithm for Boolean matrix factorization
   '''
 
-  def __init__(self, rank: int,
-                tau: float,
-                wp: float = 1.0, 
-                wn: float = 1.0
+  def __init__(self, 
+               rank: int,
+               tau: float,
+               wp: float = 1.0, 
+               wn: float = 1.0
   ):
     '''
     Initialize ASSO algorithm
@@ -21,14 +22,15 @@ class AssoAlgorithm(BMFAlgorithm):
       wp: Weight for positive matches
       wn: Weight for negative matches (penalty for false positives)
     '''
-    super().__init__(rank=rank, tau=tau, wp=wp, wn=wn)
+    super().__init__()
+    self.rank = rank
     self.tau = tau
     self.wp = wp
     self.wn = wn
 
   @property
   def name(self) -> str:
-    return 'ASSO'
+    return 'Asso'
 
   def _compute_cover_score(self, B: np.ndarray, S: np.ndarray, C: np.ndarray) -> float:
     '''
@@ -63,7 +65,7 @@ class AssoAlgorithm(BMFAlgorithm):
     
     return A
   
-  def fit(self, C: np.ndarray) -> BMFResult:
+  def solve(self, C: np.ndarray) -> BMFResult:
     '''
     Fit ASSO algorithm to the input matrix
     Args:
@@ -134,13 +136,3 @@ class AssoAlgorithm(BMFAlgorithm):
                                                       'wp': self.wp,
                                                       'wn': self.wn})
     return result
-  
-  def reconstruct(self) -> np.ndarray:
-    '''
-    Reconstruct the original data matrix using learned factors.
-    Returns:
-      Reconstructed data matrix
-    '''
-    if not hasattr(self, 'S') or not hasattr(self, 'B'):
-      raise ValueError('Model must be fitted before reconstruction')
-    return utils.boolean_product(self.S, self.B)

@@ -1,4 +1,4 @@
-from BMF import GreedyBMF as greedy, AssoAlgorithm as asso, utils
+from BMF import Asso, utils
 import numpy as np
 
 # Input matrix
@@ -14,7 +14,7 @@ def is_binary(M):
 
 # Loop over tau values
 for tau in [0.2, 0.4, 0.5, 0.6, 0.8, 1.0]:
-  algo = asso(rank=2, tau=tau)
+  algo = Asso(rank=2, tau=tau)
   result = algo.fit(X)
 
   # Print results for debugging

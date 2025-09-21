@@ -1,8 +1,7 @@
 import numpy as np
 from .base import BMFAlgorithm
-from ..utils import utils, BMFResult
+from ..utils import BMFResult
 from typing import List, Tuple, Set
-import time
 
 class GreConD(BMFAlgorithm):
   def __init__(self):
@@ -28,14 +27,11 @@ class GreConD(BMFAlgorithm):
         attributes.add(j)
     return attributes
 
-  def formal_concepts(self, A: np.ndarray, D: List[Tuple[Set[int], Set[int]]]) -> List[Tuple[Set[int], Set[int]]]:
-    m, n = A.shape
-
   def solve(self, A: np.ndarray) -> BMFResult:
     self._validate_input(A)
     m, n = A.shape
     A_copy = A.copy()
-    start = time.time()
+
     universe: Set[Tuple[int, int]] = {(i, j) for i in range(m) for j in range(n) if A[i, j] == 1}
     factor_concepts: List[Tuple[Set[int], Set[int]]] = []
     while universe:
@@ -57,7 +53,6 @@ class GreConD(BMFAlgorithm):
         if i in C and j in D:
           universe.remove((i, j))
     
-    end = time.time()
     B = np.zeros((m, len(factor_concepts)), dtype=int)
     C = np.zeros((len(factor_concepts), n), dtype=int)
     for l, (C_l, D_l) in enumerate(factor_concepts):
@@ -65,6 +60,5 @@ class GreConD(BMFAlgorithm):
         B[i, l] = 1
       for j in D_l:
         C[l, j] = 1
-    result = BMFResult(B=B, C=C, time=end-start)
-    return result
 
+    return BMFResult(B, C)

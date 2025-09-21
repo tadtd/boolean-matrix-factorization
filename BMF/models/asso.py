@@ -2,6 +2,7 @@ import numpy as np
 from .base import BMFAlgorithm
 from ..utils import utils, BMFResult
 import time
+from typing import Tuple
 
 class Asso(BMFAlgorithm):
   '''
@@ -65,7 +66,7 @@ class Asso(BMFAlgorithm):
     
     return A
   
-  def solve(self, C: np.ndarray) -> BMFResult:
+  def solve(self, C: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     '''
     Fit ASSO algorithm to the input matrix
     Args:
@@ -73,7 +74,7 @@ class Asso(BMFAlgorithm):
     Returns:
       BMFResult object containing the factorization C = S \circ B
     '''
-    start_time = time.time()
+
     k = self.rank
 
     # Validate input
@@ -116,23 +117,9 @@ class Asso(BMFAlgorithm):
         B[i, :] = C[:, best_col]  # Use original column
         used_columns.add(best_col)
     
-    # Compute reconstruction
-    reconstruction = utils.boolean_product(S, B)
-    # Compute error
-    error = np.sum(np.abs(C - reconstruction))
-    # Compute convergence time
-    convergence_time = time.time() - start_time
-    # Check convergence (using error threshold)
-    converged = error == 0  # For boolean matrices, perfect reconstruction is possible
-    
-    # Store the factor matrices
-    self.S = S
-    self.B = B
-    
     # Create result object
-    result = BMFResult(B=S, C=B, original_matrix=C, error=error,
-                       iterations=self.rank, convergence_time=convergence_time,
-                       converged=converged, metadata={'tau': self.tau,
-                                                      'wp': self.wp,
-                                                      'wn': self.wn})
+    result = BMFResult(B=S, C=B,
+                       metadata={'tau': self.tau,
+                                 'wp': self.wp,
+                                 'wn': self.wn})
     return result

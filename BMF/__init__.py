@@ -23,8 +23,7 @@ boolean_product = utils.boolean_product
 cosine_similarity = utils.cosine_similarity
 
 # For backward compatibility
-AssoAlgorithm = models.Asso
-GreedyBMF = models.Greedy
+Asso = models.Asso
 BMFAlgorithm = models.BMFAlgorithm
 
 # Package metadata
@@ -43,7 +42,6 @@ __all__ = [
 
   # Direct classes (backward compatibility)
   'Asso',
-  'Greedy', 
   'GreConD',
   'BMFAlgorithm',
   

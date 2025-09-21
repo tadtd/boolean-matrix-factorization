@@ -7,14 +7,12 @@ class BMFAlgorithm(ABC):
   Base class for all BMF algorithms. 
   '''
 
-  def __init__(self, rank: int, **kwargs):
+  def __init__(self, **kwargs):
     '''
     Initialize the BMF algorithm with given parameters.
     Args:
       **kwargs: Algorithm-specific parameters.
     '''
-    self.B = None
-    self.C = None
     self.params = kwargs
   
   @abstractmethod

@@ -15,7 +15,7 @@ def is_binary(M):
 # Loop over tau values
 for tau in [0.2, 0.4, 0.5, 0.6, 0.8, 1.0]:
   algo = Asso(rank=2, tau=tau)
-  result = algo.fit(X)
+  result = algo.solve(X)
 
   # Print results for debugging
   print(f"\n=== tau = {tau} ===")

@@ -14,6 +14,8 @@ class GreConD(BMFAlgorithm):
   def attributes_to_objects(self, A: np.ndarray, D: Set[int]) -> Set[int]:
     objects: Set[int] = set()
     m, _ = A.shape
+    if not D:
+      return set(range(m))
     for i in range(m):
       if all(A[i, j] == 1 for j in D):
         objects.add(i)
@@ -21,9 +23,11 @@ class GreConD(BMFAlgorithm):
 
   def objects_to_attributes(self, A: np.ndarray, C: Set[int]) -> Set[int]:
     attributes: Set[int] = set()
-    m, _ = A.shape
-    for j in C:
-      if all(A[i, j] == 1 for i in range(m)):
+    _, n = A.shape
+    if not C:
+      return set(range(n))
+    for j in range(n):
+      if all(A[i, j] == 1 for i in C):
         attributes.add(j)
     return attributes
 
@@ -37,21 +41,31 @@ class GreConD(BMFAlgorithm):
     while universe:
       D: Set[int] = set()
       V: int = 0
-      for j in range(n):
-        if j not in D:
-          D_j = D.union({j})
-          C_j = self.attributes_to_objects(A_copy, D_j)
-          D_j = self.objects_to_attributes(A_copy, C_j)
-          formal_concepts = (C_j, D_j)
-          D_oplus_j = formal_concepts.intersection(universe)
-          if D_oplus_j and len(D_oplus_j) > V:
-            V = len(D_oplus_j)
-            D = D_j
+      while True:
+        best_j, best_gain, best_D = None, 0, D
+        for j in range(n):
+          if j not in D:
+            D_candidate = D | {j}
+            C_candidate = self.attributes_to_objects(A_copy, D_candidate)
+            D_candidate = self.objects_to_attributes(A_copy, C_candidate)
+            concept_pairs = {(i, jj) for i in C_candidate for jj in D_candidate}
+            gain = len(concept_pairs & universe)
+            if gain > best_gain:
+              best_gain = gain
+              best_j = j
+              best_D = D_candidate
+        if best_j is None:
+          break
+        if best_gain > V:
+          V = best_gain
+          D = best_D
+        else:
+          break
+      
       C = self.attributes_to_objects(A_copy, D)
       factor_concepts.append((C, D))
-      for (i, j) in list(universe):
-        if i in C and j in D:
-          universe.remove((i, j))
+      for (i, j) in {(i, j) for i in C for j in D}:
+        universe.discard((i, j))
     
     B = np.zeros((m, len(factor_concepts)), dtype=int)
     C = np.zeros((len(factor_concepts), n), dtype=int)
@@ -61,4 +75,4 @@ class GreConD(BMFAlgorithm):
       for j in D_l:
         C[l, j] = 1
 
-    return BMFResult(B, C)
+    return BMFResult(A=A, B=B, C=C)

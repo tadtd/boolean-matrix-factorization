@@ -1,8 +1,6 @@
 import numpy as np
 from .base import BMFAlgorithm
 from ..utils import utils, BMFResult
-import time
-from typing import Tuple
 
 class Asso(BMFAlgorithm):
   '''
@@ -66,7 +64,7 @@ class Asso(BMFAlgorithm):
     
     return A
   
-  def solve(self, C: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+  def solve(self, C: np.ndarray) -> BMFResult:
     '''
     Fit ASSO algorithm to the input matrix
     Args:
@@ -118,7 +116,7 @@ class Asso(BMFAlgorithm):
         used_columns.add(best_col)
     
     # Create result object
-    result = BMFResult(B=S, C=B,
+    result = BMFResult(A=C, B=S, C=B,
                        metadata={'tau': self.tau,
                                  'wp': self.wp,
                                  'wn': self.wn})

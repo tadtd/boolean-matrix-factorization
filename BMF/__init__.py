@@ -24,6 +24,8 @@ cosine_similarity = utils.cosine_similarity
 
 # For backward compatibility
 Asso = models.Asso
+GreCon = models.GreCon
+GreConD = models.GreConD
 BMFAlgorithm = models.BMFAlgorithm
 
 # Package metadata
@@ -42,6 +44,7 @@ __all__ = [
 
   # Direct classes (backward compatibility)
   'Asso',
+  'GreCon',
   'GreConD',
   'BMFAlgorithm',
   

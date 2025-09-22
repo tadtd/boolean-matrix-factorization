@@ -1,7 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import Tuple, Optional, Dict, Any
-import time
+from typing import Dict, Any
 
 class utils:
   '''
@@ -52,9 +51,13 @@ class BMFResult:
   def summary(self) -> Dict[str, Any]:
     return {
       'rank': self.rank,
-      'error': self.error
+      'error': self.error,
+      'metadata': self.metadata
     }
 
   def __str__(self) -> str:
     summary = self.summary()
     return f"Rank={summary['rank']}, error={summary['error']}"
+  
+  def __repr__(self) -> str:
+    return self.__str__()

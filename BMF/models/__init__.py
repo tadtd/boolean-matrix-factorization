@@ -6,10 +6,12 @@ This module contains implementations of various Boolean Matrix Factorization alg
 
 from .base import BMFAlgorithm
 from .asso import Asso
+from .grecon import GreCon
 from .grecond import GreConD
 
 __all__ = [
   'BMFAlgorithm',
   'Asso', 
-  'GreConD'
+  'GreCon',
+  'GreConD',
 ]

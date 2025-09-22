@@ -7,6 +7,10 @@ class GreCon(BMFAlgorithm):
   def __init__(self):
     super().__init__()
 
+  @property
+  def name(self) -> str:
+    return 'GreCon'
+
   def objects_to_attributes(self, A: np.ndarray, C: Set[int]) -> Set[int]:
     _, n = A.shape
     if not C:
@@ -33,7 +37,7 @@ class GreCon(BMFAlgorithm):
     for x in range(m):
       intent = {j for j in range(n) if A[x, j] == 1}
       extent = self.attributes_to_objects(A, intent)
-      object_concepts.add(frozenset(extent), frozenset(intent))
+      object_concepts.add((frozenset(extent), frozenset(intent)))
     return object_concepts
 
   def all_attributes_concept(self, A: np.ndarray) -> Set[Tuple[int, int]]:
@@ -41,35 +45,39 @@ class GreCon(BMFAlgorithm):
     attribute_concepts: Set[Tuple[FrozenSet[int], FrozenSet[int]]] = set()
     for y in range(n):
       extent = {i for i in range(m) if A[i, y] == 1}
-      intent = self.attributes_to_objects(A, extent)
-      attribute_concepts.add(frozenset(intent), frozenset(extent))
+      intent = self.objects_to_attributes(A, extent)
+      attribute_concepts.add((frozenset(extent), frozenset(intent)))
     return attribute_concepts
 
   # Ganter algorithm for generating all formal concepts
   def generate_all_formal_concepts(self, A: np.ndarray) -> List[Tuple[Set[int], Set[int]]]:
     _, n = A.shape
     A_copy = A.copy()
-    formal_concepts: List[Tuple[Set[int], Set[int]]] = []
-    D = set()
-    while True:
-      C = self.attributes_to_objects(A_copy, D)
-      D_closure = self.objects_to_attributes(A_copy, C)
-      formal_concepts.append((C, D_closure))
-      
-      found = False
+    concepts: List[Tuple[Set[int], Set[int]]] = []
+
+    D: Set[int] = set()  # start with empty intent
+
+    def next_closure(D: Set[int]) -> Optional[Set[int]]:
+      """Compute next closure after D using NextClosure algorithm."""
       for j in reversed(range(n)):
         if j not in D:
           E = {k for k in D if k < j} | {j}
-          C_new = self.attributes_to_objects(A_copy, E)
-          E_closure = self.objects_to_attributes(A_copy, C_new)
-          if all(k in E_closure for k in D if k < j):
-            D = E_closure
-            found = True
-            break
+          extent = self.attributes_to_objects(A_copy, E)
+          closure = self.objects_to_attributes(A_copy, extent)
+          if all(k in closure for k in D if k < j):
+            return closure
+      return None
 
-      if not found:
+    while True:
+      extent = self.attributes_to_objects(A_copy, D)
+      intent = self.objects_to_attributes(A_copy, extent)
+      concepts.append((extent, intent))
+      D_next = next_closure(D)
+      if D_next is None:
         break
-    return formal_concepts
+      D = D_next
+
+    return concepts
 
   def solve(self, A: np.ndarray) -> BMFResult:
     self._validate_input(A)
@@ -78,7 +86,6 @@ class GreCon(BMFAlgorithm):
 
     S_all = self.generate_all_formal_concepts(A_copy)
     S_list: List[Tuple[Set[int], Set[int]]] = [(set(C), set(D)) for (C, D) in S_all]
-    S_set_hashable = {(frozenset(C), frozenset(D)) for (C, D) in S_list} 
 
     universe: Set[Tuple[int, int]] = {(i, j) for i in range(m) for j in range(n) if A_copy[i, j] == 1}
     obj_concepts = self.all_object_concepts(A=A_copy)
@@ -128,4 +135,4 @@ class GreCon(BMFAlgorithm):
       for j in D_l:
         C[l, j] = 1
 
-    return BMFResult(A=A, B=B, C=C)    
+    return BMFResult(A=A, B=B, C=C)

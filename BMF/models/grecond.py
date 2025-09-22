@@ -54,21 +54,22 @@ class GreConD(BMFAlgorithm):
               best_gain = gain
               best_j = j
               best_D = D_candidate
-        if best_j is None:
+        
+        if best_j is None or best_gain <= V:
           break
-        if best_gain > V:
-          V = best_gain
-          D = best_D
-        else:
-          break
+
+        V = best_gain
+        D = best_D
       
       C = self.attributes_to_objects(A_copy, D)
       factor_concepts.append((C, D))
-      for (i, j) in {(i, j) for i in C for j in D}:
-        universe.discard((i, j))
+      for i in C:
+        for j in D:
+          universe.discard((i, j))
     
-    B = np.zeros((m, len(factor_concepts)), dtype=int)
-    C = np.zeros((len(factor_concepts), n), dtype=int)
+    rank = len(factor_concepts)
+    B = np.zeros((m, rank), dtype=int)
+    C = np.zeros((rank, n), dtype=int)
     for l, (C_l, D_l) in enumerate(factor_concepts):
       for i in C_l:
         B[i, l] = 1

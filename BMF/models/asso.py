@@ -22,7 +22,6 @@ class Asso(BMFAlgorithm):
       wn: Weight for negative matches (penalty for false positives)
     '''
     super().__init__()
-    self.rank = rank
     self.tau = tau
     self.wp = wp
     self.wn = wn

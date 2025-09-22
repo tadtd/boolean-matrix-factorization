@@ -55,6 +55,18 @@ class BMFResult:
       'metadata': self.metadata
     }
 
+  def show_factors(self) -> None:
+    '''
+    Pretty-print the factor matrices B and C 
+    '''
+    print('Factor matrix B (objects x rank):')
+    for row in self.B:
+      print("[" + ", ".join(str(int(x)) for x in row) + "]")
+
+    print('Factor matrix C (rank x attributes):')
+    for row in self.C:
+      print("[" + ", ".join(str(int(x)) for x in row) + "]")
+
   def __str__(self) -> str:
     summary = self.summary()
     return f"Rank={summary['rank']}, error={summary['error']}"

@@ -1,6 +1,6 @@
 import numpy as np
-from abc import ABC, abstractmethod
 from typing import Dict, Any
+import os
 
 class utils:
   '''
@@ -34,6 +34,27 @@ class utils:
       return 0.0
     return np.dot(v2, v1) / denom
   
+  @staticmethod
+  def is_boolean_matrix(A: np.ndarray) -> None:
+    if not np.all((A==0) | (A==1)):
+      raise ValueError('Input must be a boolean matrix')
+  
+  @staticmethod
+  def random_boolean_matrix(m: int, n: int, density: float = 0.5, random_state: int = None) -> np.ndarray:
+    '''
+    Create a random boolean matrix.
+    Args:
+      m: Number of rows
+      n: Number of columns
+      density: Density of 1s in the matrix
+      random_state: Random seed
+    Returns:
+      Random boolean matrix of shape (m, n).
+    '''
+    if random_state is not None:
+      np.random.seed(random_state)
+    return (np.random.rand(m, n) < density).astype(int)
+    
 class BMFResult:
   def __init__(self,
                A: np.ndarray,
@@ -45,13 +66,15 @@ class BMFResult:
     self.C = C
     self.rank = B.shape[1]
     self.reconstruction = utils.boolean_product(B, C)
-    self.error = np.linalg.norm(np.bitwise_xor(self.A, self.reconstruction), ord='fro')
+    self.error = np.linalg.norm(np.bitwise_xor(self.A, self.reconstruction), ord='fro') ** 2
+    self.coverage = np.sum(self.reconstruction) / np.sum(self.A)  
     self.metadata = metadata
 
   def summary(self) -> Dict[str, Any]:
     return {
       'rank': self.rank,
       'error': self.error,
+      'coverage': self.coverage,
       'metadata': self.metadata
     }
 
@@ -67,9 +90,28 @@ class BMFResult:
     for row in self.C:
       print("[" + ", ".join(str(int(x)) for x in row) + "]")
 
+  def save_factors(self, filename_prefix: str, path: str = '.', filetype: str = 'csv') -> None:
+    if filetype not in ('csv', 'txt'):
+      raise ValueError("File type must be 'csv' or 'txt'")
+    
+    os.makedirs(path, exist_ok=True)
+
+    B_file = os.path.join(path, f"{filename_prefix}_B.{filetype}")
+    C_file = os.path.join(path, f"{filename_prefix}_C.{filetype}")
+    A_hat_file = os.path.join(path, f"{filename_prefix}_A_hat.{filetype}")
+
+    if filetype == 'csv':
+      np.savetxt(B_file, self.B, fmt='%d', delimiter=',')
+      np.savetxt(C_file, self.C, fmt='%d', delimiter=',')
+      np.savetxt(A_hat_file, self.reconstruction, fmt='%d', delimiter=',')
+    elif filetype == 'txt':
+      np.savetxt(B_file, self.B, fmt='%d', delimiter=' ')
+      np.savetxt(C_file, self.C, fmt='%d', delimiter=' ')
+      np.savetxt(A_hat_file, self.reconstruction, fmt='%d', delimiter=' ')
+
   def __str__(self) -> str:
     summary = self.summary()
-    return f"Rank={summary['rank']}, error={summary['error']}"
+    return f"Rank={summary['rank']}, error={summary['error']}, coverage={summary['coverage']}"
   
   def __repr__(self) -> str:
     return self.__str__()

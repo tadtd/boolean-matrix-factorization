@@ -2,6 +2,7 @@ import numpy as np
 from .base import BMFAlgorithm
 from ..utils import BMFResult
 from typing import List, Tuple, Set
+import time
 
 class GreConD(BMFAlgorithm):
   def __init__(self):
@@ -33,6 +34,9 @@ class GreConD(BMFAlgorithm):
 
   def solve(self, A: np.ndarray) -> BMFResult:
     self._validate_input(A)
+
+    start_time = time.time()
+
     m, n = A.shape
     A_copy = A.copy()
 
@@ -67,6 +71,9 @@ class GreConD(BMFAlgorithm):
         for j in D:
           universe.discard((i, j))
     
+    run_time = time.time() - start_time
+    print(f"[GreConD] factorize runtime: {run_time:.6f} seconds")
+
     rank = len(factor_concepts)
     B = np.zeros((m, rank), dtype=int)
     C = np.zeros((rank, n), dtype=int)
@@ -76,4 +83,4 @@ class GreConD(BMFAlgorithm):
       for j in D_l:
         C[l, j] = 1
 
-    return BMFResult(A=A, B=B, C=C)
+    return BMFResult(A=A, B=B, C=C, time_taken=run_time)

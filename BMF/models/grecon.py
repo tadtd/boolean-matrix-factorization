@@ -2,6 +2,7 @@ import numpy as np
 from .base import BMFAlgorithm
 from ..utils import BMFResult
 from typing import List, Set, Tuple, Optional
+import time
 
 class GreCon(BMFAlgorithm):
   def __init__(self):
@@ -77,6 +78,7 @@ class GreCon(BMFAlgorithm):
 
   def solve(self, A: np.ndarray) -> BMFResult:
     self._validate_input(A)
+    start_time = time.time()
     m, n = A.shape
     A_copy = A.copy()
 
@@ -111,6 +113,9 @@ class GreCon(BMFAlgorithm):
       if idx is not None:
         concepts_with_pairs.pop(idx)
 
+    run_time = time.time() - start_time
+    print(f"[GreCon] factorize runtime: {run_time:.6f} seconds")    
+    
     # Step 4: Construct factor matrices
     rank = len(factor_concepts)
     B = np.zeros((m, rank), dtype=int)
@@ -121,4 +126,4 @@ class GreCon(BMFAlgorithm):
       for j in D_l:
         C[l, j] = 1
 
-    return BMFResult(A=A, B=B, C=C)
+    return BMFResult(A=A, B=B, C=C, time_taken=run_time)

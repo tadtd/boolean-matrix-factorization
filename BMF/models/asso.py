@@ -1,123 +1,216 @@
 import numpy as np
+import time
 from .base import BMFAlgorithm
-from ..utils import utils, BMFResult
+from ..utils import BMFResult
+from typing import List, Tuple
+
 
 class Asso(BMFAlgorithm):
-  '''
-  Implementation of the ASSO algorithm for Boolean matrix factorization
-  '''
-
-  def __init__(self, 
-               rank: int,
-               tau: float,
-               wp: float = 1.0, 
-               wn: float = 1.0
-  ):
-    '''
-    Initialize ASSO algorithm
-      Args:
-      k: Target rank for factorization
-      tau: Similarity threshold for candidate selection
-      wp: Weight for positive matches
-      wn: Weight for negative matches (penalty for false positives)
-    '''
+  """
+  Association-based Boolean Matrix Factorization algorithm.
+  
+  This algorithm uses association rules to find basis vectors and greedily
+  selects factors based on coverage scoring.
+  """
+  
+  def __init__(self, rank: int = 5, tau: float = 0.8, wp: float = 1.0, wn: float = 1.0):
+    """
+    Initialize Asso algorithm.
+    
+    Args:
+        rank (int): Number of factors/components
+        tau (float): Confidence threshold for association rules
+        wp (float): Weight for positive matches (true positives)
+        wn (float): Weight for negative penalty (false positives)
+    """
     super().__init__()
     self.rank = rank
     self.tau = tau
     self.wp = wp
     self.wn = wn
-
+  
   @property
   def name(self) -> str:
-    return 'Asso'
-
-  def _compute_cover_score(self, B: np.ndarray, S: np.ndarray, C: np.ndarray) -> float:
-    '''
-    Compute the cover score for current factorization
+    return "Asso"
+  
+  def _compute_confidence(self, A: np.ndarray, i: int, j: int) -> float:
+    """
+    Compute confidence: conf(i → j) = |c_i ∧ c_j| / |c_i|
+    
     Args:
-      B, S: Factor matrices
-      C: Original matrix
+        A: Input matrix
+        i, j: Column indices
+        
+    Returns:
+        Confidence value
+    """
+    # Count support and intersection
+    supp = np.sum(A[:, i])
+    if supp == 0:
+      return 0.0
+        
+    inter = np.sum(A[:, i] & A[:, j])
+    return float(inter) / float(supp)
+  
+  def _build_association_matrix(self, A: np.ndarray) -> np.ndarray:
+    """
+    Build association matrix: entry (i,j) = 1 if conf(i→j) >= tau
+    
+    Args:
+        A: Input matrix
+        
+    Returns:
+        Association matrix
+    """
+    _, n = A.shape
+    assoc = np.zeros((n, n), dtype=int)
+    
+    for i in range(n):
+      for j in range(n):
+        if self._compute_confidence(A, i, j) >= self.tau:
+          assoc[i, j] = 1
+    
+    return assoc
+  
+  def _generate_optimal_s(self, A: np.ndarray, covered: np.ndarray, 
+                          basis_vector: np.ndarray) -> np.ndarray:
+    """
+    Generate s: select rows where candidate improves score
+    
+    Args:
+      A: Input matrix
+      covered: Already covered entries
+      basis_vector: Current basis vector
+        
+    Returns:
+      Column vector s indicating selected rows
+    """
+    m, n = A.shape
+    s = np.zeros((m, 1), dtype=int)
+    
+    for i in range(m):
+      gain = 0
+      for j in range(n):
+        if basis_vector[j]:
+          if A[i, j]:
+            if not covered[i, j]:
+              gain += int(self.wp)
+          else:
+            if not covered[i, j]:
+              gain -= int(self.wn)
+      
+      if gain > 0:
+        s[i, 0] = 1
+    
+    return s
+  
+  def _compute_cover_score(self, B: np.ndarray, C: np.ndarray, A: np.ndarray) -> float:
+    """
+    Compute cover score = w+ * TP - w- * FP
+    
+    Args:
+      B, C: Factor matrices
+      A: Original matrix
+        
     Returns:
       Cover score
-    '''
-    appr = utils.boolean_product(S, B)
-    positive_score = self.wp * np.sum((C == 1) & (appr == 1))
-    negative_penalty = self.wn * np.sum((C == 0) & (appr == 1))
-    return positive_score - negative_penalty
+    """
+    approx = self._boolean_multiply(B, C)
+    return self._positive_score(A, approx) - self._negative_penalty(A, approx)
+
+  def _positive_score(self, A: np.ndarray, approx: np.ndarray) -> float:
+    """Compute positive score (true positives)"""
+    tp = np.sum(A & approx)
+    return self.wp * float(tp)
   
-  def _build_candidate_matrix(self, C: np.ndarray) -> np.ndarray:
-    '''
-    Build candidate matrix A based on column similarity.
-    Args:
-      C: Input matrix
-    Returns:
-      Candidate matrix A (same shape as C)
-    '''
-    n, m = C.shape
-    A = np.zeros((n, m), dtype=int)
-
-    for j in range(m):
-      for k in range(m):
-        similarity = utils.cosine_similarity(C[:, j], C[:, k])
-        if similarity >= self.tau:
-          A[j, k] = 1
-    
-    return A
+  def _negative_penalty(self, A: np.ndarray, approx: np.ndarray) -> float:
+    """Compute negative penalty (false positives)"""
+    fp = np.sum((~A) & approx)
+    return self.wn * float(fp)
   
-  def solve(self, C: np.ndarray) -> BMFResult:
-    '''
-    Fit ASSO algorithm to the input matrix
+  def _boolean_multiply(self, B: np.ndarray, C: np.ndarray) -> np.ndarray:
+    """Boolean matrix multiplication: (B * C) > 0"""
+    return (np.dot(B, C) > 0).astype(int)
+  
+  def solve(self, A: np.ndarray) -> BMFResult:
+    """
+    Factorize boolean matrix A using association-based approach.
+    
     Args:
-      C: Input matrix (n x m)
-    Returns:
-      BMFResult object containing the factorization C = S \circ B
-    '''
-
-    k = self.rank
-
-    # Validate input
-    self._validate_input(C)
-
-    n, m = C.shape
-
-    # Initialize result matrices - S is n x k, B is k x m
-    S = np.zeros((n, k), dtype=int)
-    B = np.zeros((k, m), dtype=int)
-
-    # Build candidate matrix
-    A = self._build_candidate_matrix(C)
-    
-    # Track which columns have been used
-    used_columns = set()
-    
-    for i in range(k):
-      # Select the best candidate column based on cover score
-      best_col = -1
-      best_score = -np.inf
-      
-      for j in range(m):
-        if j in used_columns or A[:, j].sum() == 0:
-          continue
-          
-        # Create temporary matrices to test this candidate
-        S_temp = S.copy()
-        B_temp = B.copy()
-        S_temp[:, i] = A[:, j]
-        B_temp[i, :] = C[:, j]  # Use original column, not candidate
+      A (np.ndarray): Input boolean matrix
         
-        score = self._compute_cover_score(B_temp, S_temp, C)
+    Returns:
+      BMFResult: Factorization result containing B, C matrices and metadata
+    """
+    self._validate_input(A)
+    start_time = time.time()
+    
+    m, n = A.shape
+    k = self.rank
+    
+    # Initialize B (m × k) and C (k × n)
+    B = np.zeros((m, k), dtype=int)
+    C = np.zeros((k, n), dtype=int)
+    
+    # Build association matrix (n × n)
+    association_mat = self._build_association_matrix(A)
+    
+    # Track covered entries
+    covered = np.zeros((m, n), dtype=bool)
+    
+    # Greedy selection of basis vectors
+    for l in range(k):
+      best_score = float('-inf')
+      best_index = -1
+      best_basis_vec = None
+      best_s = None
+      
+      # Try each column of association matrix as candidate
+      for cand in range(n):
+        candidate_vec = association_mat[cand, :].astype(bool)
+        
+        # Generate s (indicator of rows explained by this basis)
+        s = self._generate_optimal_s(A, covered, candidate_vec)
+        
+        # Build temporary C with row l = candidate_vec
+        C_tmp = C.copy()
+        C_tmp[l, :] = candidate_vec.astype(int)
+        
+        # Build temporary B with column l from s
+        B_tmp = B.copy()
+        B_tmp[:, l] = s.flatten()
+        
+        # Score this candidate
+        score = self._compute_cover_score(B_tmp, C_tmp, A)
+        
         if score > best_score:
           best_score = score
-          best_col = j
+          best_index = cand
+          best_basis_vec = candidate_vec
+          best_s = s
       
-      if best_col != -1:
-        S[:, i] = A[:, best_col]
-        B[i, :] = C[:, best_col]  # Use original column
-        used_columns.add(best_col)
+      # Commit best candidate into B and C
+      if best_index >= 0 and best_basis_vec is not None and best_s is not None:
+        C[l, :] = best_basis_vec.astype(int)
+        B[:, l] = best_s.flatten()
+        
+        # Update covered entries: covered = covered OR (s * basis_vec^T)
+        s_bool = best_s.flatten().astype(bool)
+        for i in range(m):
+          if s_bool[i]:
+            for j in range(n):
+              if best_basis_vec[j]:
+                covered[i, j] = True
     
-    # Create result object
-    result = BMFResult(A=C, B=S, C=B,
-                       metadata={'tau': self.tau,
-                                 'wp': self.wp,
-                                 'wn': self.wn})
-    return result
+    end_time = time.time()
+    runtime = end_time - start_time
+    
+    print(f"[Asso] factorize runtime: {runtime:.6f} seconds")    
+   
+    metadata = {
+      'tau': self.tau,
+      'wp': self.wp,
+      'wn': self.wn,
+    }
+
+    return BMFResult(A=A, B=B, C=C, time_taken=runtime, metadata=metadata)

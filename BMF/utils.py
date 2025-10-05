@@ -60,6 +60,7 @@ class BMFResult:
                A: np.ndarray,
                B: np.ndarray,
                C: np.ndarray,
+               time_taken: float = 0.0,
                metadata: Dict[str, Any] = {}):
     self.A = A
     self.B = B
@@ -69,6 +70,7 @@ class BMFResult:
     self.error = np.linalg.norm(np.bitwise_xor(self.A, self.reconstruction), ord='fro') ** 2
     self.coverage = np.sum(self.reconstruction) / np.sum(self.A)  
     self.metadata = metadata
+    self.time_taken = time_taken
 
   def summary(self) -> Dict[str, Any]:
     return {

@@ -3,3 +3,5 @@ pytest
 ucimlrepo
 pandas
 scikit-learn
+ipykernel
+ipython

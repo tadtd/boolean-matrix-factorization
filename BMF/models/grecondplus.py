@@ -5,25 +5,6 @@ from typing import Set, Tuple
 import time
 
 class GreConDPlus(BMFAlgorithm):
-  """
-  GreConDPlus - Greedy Concept-based Boolean Matrix Factorization Plus
-  
-  Enhanced version of GreConD with:
-  - Extension step: adds nearby non-concept factor pairs
-  - Proper redundancy removal: removes factors entirely covered by others
-  - Nucleus-based pruning: removes non-nucleus attributes when redundant
-  
-  Algorithm:
-  1. Initialize factor set F and universe U of all (i,j) pairs with A[i,j] = 1
-  2. While U is not empty:
-     a. Find formal concept (C, D) maximizing gain
-     b. Extend with nearby objects E and attributes F
-     c. Add factor (C∪E, D∪F) to F and remove covered pairs from U
-     d. Apply redundancy removal and pruning procedure
-  
-  Redundancy removal checks if factors are entirely covered by others.
-  Pruning removes non-nucleus attributes that are covered by other factors.
-  """
   def __init__(self, w: int = 1):
     super().__init__()
     self.w = w

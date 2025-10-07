@@ -1,50 +1,59 @@
 # Boolean Matrix Factorization (BMF)
 
-A Python-based project for studying and experimenting with Boolean Matrix Factorization. It provides a modular framework for exploring and comparing different BMF algorithms.
+## 📚 Overview
 
-In addition, this repository aims to reproduce the results of the paper "Boolean Matrix Factorization and Noisy Completion via Message Passing" by **Siamak Ravanbakhsh, Barnabás Póczos, and Russell Greiner.**
+Boolean Matrix Factorization decomposes a boolean matrix **A** into two boolean matrices **B** and **C** such that **A ≈ B ⊙ C**. (where ⊙ is boolean product).
 
-## Overview
-
-Boolean Matrix Factorization decomposes a binary matrix **A** into the Boolean product of two factor matrices **B** and **C**, such that **A ≈ B ∘ C**, where ∘ denotes the Boolean matrix product.
-
-### Applications
-
-BMF is closely related to important combinatorial optimization problems:
-- **Set Covering Problem**: BMF can be viewed as finding a minimal set of basis vectors that cover all data points, where each factor represents a subset of features
-- **Biclique Covering Problem**: Finding a minimal collection of bicliques (complete bipartite subgraphs) that cover all edges in a bipartite graph, directly corresponding to Boolean matrix factorization
-
-This library currently implements:
-- **Greedy BMF**: Greedy rank-1 approximation approach
-- **ASSO Algorithm**: Association-based factorization using similarity thresholds
-
-## Installation
+## 📦 Installation
 
 ### Requirements
-- Python ≥ 3.10
-- NumPy ≥ 1.15.4
+- Python 3.7+
 
-Install dependencies:
+### Setup Steps
 ```bash
+# 1. Clone the repository
+git clone https://github.com/tadtd/boolean-matrix-factorization.git
+cd boolean-matrix-factorization
+
+# 2. Create virtual environment
+python -m venv venv
+
+# 3. Activate virtual environment
+source venv/bin/activate # on linux/macOS
+# or
+./venv/Scripts/activate # on Windows
+
+# 4. Install dependencies
 pip install -r requirements.txt
 ```
 
-## Contributing
+## 🧮 Available Algorithms
 
-Contributions are welcome! If you'd like to contribute to this project:
+### Asso (Association-based BMF)
+Uses association rules and greedy selection for factorization.
 
-1. **Issues**: Feel free to open an issue to report bugs, request features, or discuss improvements
-2. **Pull Requests**: Submit a pull request with your changes.
-## License
+**Parameters:**
+- `rank`: Number of factors (default: 5)
+- `tau`: Confidence threshold (default: 0.8)
+- `wp`: Weight for positive matches (default: 1.0)
+- `wn`: Weight for negative penalty (default: 1.0)
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### GreCon (Greedy Concept-based BMF)
+Uses formal concept analysis and set covering approach.
 
-This project is intended for research and educational purposes.
+**Parameters:** None required
 
-## Contact
+### GreConD (Greedy Concept with Decomposition)
+Enhanced version of GreCon with decomposition strategies.
 
-For research collaboration or questions about implementation details, feel free to contact me via email: [dotiendat1725@gmail.com](mailto:dotiendat1725@gmail.com)
+**Parameters:** None required
 
-<!-- ---
+## 🔗 Related Components
 
-*This library serves as a foundation for Boolean Matrix Factorization research and can be extended for various applications in data mining, pattern recognition, and optimization.* -->
+- **Set Covering**: Related optimization problem
+- **Biclique Covering on bipartite graphs**: Graph-based problem variant
+- **LDPC**: Error correction code applications
+
+---
+
+For detailed code examples and implementation details, refer to test files and algorithm implementations.

@@ -26,6 +26,7 @@ cosine_similarity = utils.cosine_similarity
 Asso = models.Asso
 GreCon = models.GreCon
 GreConD = models.GreConD
+GreConDPlus = models.GreConDPlus
 BMFAlgorithm = models.BMFAlgorithm
 
 # Package metadata
@@ -46,8 +47,9 @@ __all__ = [
   'Asso',
   'GreCon',
   'GreConD',
+  'GreConDPlus',
   'BMFAlgorithm',
-  
+
   # Metadata
   '__version__',
   '__author__',

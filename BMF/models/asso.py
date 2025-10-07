@@ -158,6 +158,8 @@ class Asso(BMFAlgorithm):
     # Track covered entries
     covered = np.zeros((m, n), dtype=bool)
     
+    factor_id = 0
+
     # Greedy selection of basis vectors
     for l in range(k):
       best_score = float('-inf')
@@ -189,6 +191,9 @@ class Asso(BMFAlgorithm):
           best_basis_vec = candidate_vec
           best_s = s
       
+      print(f"[Asso] Selected basis vector #{factor_id} (assoc col {best_index}) with score {best_score}")
+      factor_id += 1
+
       # Commit best candidate into B and C
       if best_index >= 0 and best_basis_vec is not None and best_s is not None:
         C[l, :] = best_basis_vec.astype(int)

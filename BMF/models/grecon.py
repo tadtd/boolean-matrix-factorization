@@ -97,6 +97,8 @@ class GreCon(BMFAlgorithm):
     universe: Set[Tuple[int, int]] = {(i, j) for i in range(m) for j in range(n) if A_copy[i, j] == 1}
     factor_concepts: List[Tuple[Set[int], Set[int]]] = []
 
+    factor_id: int = 0
+
     # Step 3: GreCon greedy loop
     while universe and concepts_with_pairs:
       idx, concept, cover = self.select_max_cover(universe, concepts_with_pairs)
@@ -105,6 +107,9 @@ class GreCon(BMFAlgorithm):
 
       C_set, D_set = concept
       factor_concepts.append((C_set, D_set))
+
+      print(f"[GreCon] Found factor concept #{factor_id} with |C|={len(C_set)}, |D|={len(D_set)}, gain={cover}")
+      factor_id += 1
 
       for i in C_set:
         for j in D_set:

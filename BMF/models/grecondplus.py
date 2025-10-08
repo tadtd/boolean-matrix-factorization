@@ -15,7 +15,7 @@ class GreConDPlus(BMFAlgorithm):
   
   def attributes_to_objects(self, A: np.ndarray, attributes: Set[int]) -> Set[int]:
     """Convert set of attributes to corresponding objects (rows)."""
-    m, n = A.shape
+    m, _ = A.shape
     if not attributes:
       return set(range(m))
     
@@ -27,7 +27,7 @@ class GreConDPlus(BMFAlgorithm):
   
   def objects_to_attributes(self, A: np.ndarray, objects: Set[int]) -> Set[int]:
     """Convert set of objects to corresponding attributes (columns)."""
-    m, n = A.shape
+    _, n = A.shape
     if not objects:
       return set(range(n))
     
@@ -38,7 +38,8 @@ class GreConDPlus(BMFAlgorithm):
     return attributes
   
   def gain(self, C: Set[int], D: Set[int], F: Set[int], candidate_attrs: Set[int],
-           U: Set[Tuple[int, int]], O: Set[Tuple[int, int]], w: int) -> int:
+           U: Set[Tuple[int, int]], O: Set[Tuple[int, int]],
+           w: int) -> int:
     """
     Compute the gain of adding candidate attributes.
     Args:

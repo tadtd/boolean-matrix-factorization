@@ -1,11 +1,10 @@
 import numpy as np
 import time
-from .base import BMFAlgorithm
+from .base import BMFAlgorithm, utils
 from ..utils import BMFResult
 from typing import List, Tuple
 
 class Asso(BMFAlgorithm):
-  
   def __init__(self, rank: int = 5, tau: float = 0.8, wp: float = 1.0, wn: float = 1.0):
     """
     Initialize Asso algorithm.
@@ -108,22 +107,18 @@ class Asso(BMFAlgorithm):
     Returns:
       Cover score
     """
-    approx = self._boolean_multiply(B, C)
+    approx = utils.boolean_product(B, C)
     return self._positive_score(A, approx) - self._negative_penalty(A, approx)
 
   def _positive_score(self, A: np.ndarray, approx: np.ndarray) -> float:
     """Compute positive score (true positives)"""
-    tp = np.sum(A & approx)
+    tp = np.sum((A == 1) & (approx == 1))
     return self.wp * float(tp)
   
   def _negative_penalty(self, A: np.ndarray, approx: np.ndarray) -> float:
-    """Compute negative penalty (false positives)"""
-    fp = np.sum((~A) & approx)
+    """Compute negative penalty (false positives)."""
+    fp = np.sum((A == 0) & (approx == 1))
     return self.wn * float(fp)
-  
-  def _boolean_multiply(self, B: np.ndarray, C: np.ndarray) -> np.ndarray:
-    """Boolean matrix multiplication: (B * C) > 0"""
-    return (np.dot(B, C) > 0).astype(int)
   
   def solve(self, A: np.ndarray) -> BMFResult:
     """
@@ -183,7 +178,6 @@ class Asso(BMFAlgorithm):
           best_index = cand
           best_basis_vec = candidate_vec
           best_s = s
-      
       print(f"[Asso] Selected basis vector #{factor_id} (assoc col {best_index}) with score {best_score}")
       factor_id += 1
 

@@ -69,6 +69,10 @@ class BMFResult:
     self.reconstruction = utils.boolean_product(B, C)
     self.error = np.linalg.norm(np.bitwise_xor(self.A, self.reconstruction), ord='fro') ** 2
     self.coverage = np.sum(self.reconstruction) / np.sum(self.A)  
+    undercovered = np.sum((self.A==1) & (self.reconstruction==0))
+    overcovered = np.sum((self.A==0) & (self.reconstruction==1))
+    self.coverage_equality = 1 - (undercovered + overcovered) / np.sum(self.A)
+    self.relative_error = overcovered / np.sum(self.A)
     self.metadata = metadata
     self.time_taken = time_taken
 
@@ -77,7 +81,7 @@ class BMFResult:
       'rank': self.rank,
       'error': self.error,
       'coverage': self.coverage,
-      'metadata': self.metadata
+      'metadata': self.metadata,
     }
 
   def show_factors(self) -> None:
@@ -113,7 +117,7 @@ class BMFResult:
 
   def __str__(self) -> str:
     summary = self.summary()
-    return f"Rank={summary['rank']}, error={summary['error']}, coverage={summary['coverage']}"
+    return f"Rank={summary['rank']}, error={summary['error']}, coverage={summary['coverage']}, coverage_equality={self.coverage_equality}, relative_error={self.relative_error}"
   
   def __repr__(self) -> str:
     return self.__str__()

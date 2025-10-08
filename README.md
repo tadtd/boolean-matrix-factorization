@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## 🧮 Available Algorithms
 
-### Asso (Association-based BMF)
+### Asso 
 Uses association rules and greedy selection for factorization.
 
 **Parameters:**
@@ -38,12 +38,12 @@ Uses association rules and greedy selection for factorization.
 - `wp`: Weight for positive matches (default: 1.0)
 - `wn`: Weight for negative penalty (default: 1.0)
 
-### GreCon (Greedy Concept-based BMF)
+### GreCon 
 Uses formal concept analysis and set covering approach.
 
 **Parameters:** None required
 
-### GreConD (Greedy Concept with Decomposition)
+### GreConD 
 Enhanced version of GreCon with decomposition strategies.
 
 **Parameters:** None required

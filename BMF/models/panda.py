@@ -5,31 +5,6 @@ from typing import Optional, List
 import time
 
 class Panda(BMFAlgorithm):
-  """
-  PaNDa (Pattern and Data) algorithm for Boolean Matrix Factorization.
-  
-  PaNDa finds dense patterns in binary data by greedily selecting core patterns
-  and extending them. The algorithm maintains item extension lists and uses
-  description length minimization to guide pattern selection.
-  
-  Parameters:
-  -----------
-  k : int, optional
-    The target rank (number of factors). If None, continues until tolerance met.
-  tol : float, default: 0
-    The error tolerance for stopping criteria.
-  w_model : float, default: 1
-    The model code weight (rho in PaNDa+ paper).
-  w_fp : float, default: 1
-    The penalty weight for false positives.
-  w_fn : float, default: 1
-    The penalty weight for false negatives.
-  init_method : str, default: 'frequency'
-    How items are sorted: 'frequency', 'couples-frequency', 'correlation'.
-  exact_decomp : bool, default: False
-    Enable exact decomposition mode.
-  """
-  
   def __init__(self, k: Optional[int] = None, tol: float = 0, w_model: float = 1, 
                w_fp: float = 1, w_fn: float = 1, init_method: str = 'frequency', 
                exact_decomp: bool = False):

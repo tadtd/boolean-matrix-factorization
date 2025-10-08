@@ -4,14 +4,7 @@ from .base import BMFAlgorithm
 from ..utils import BMFResult
 from typing import List, Tuple
 
-
 class Asso(BMFAlgorithm):
-  """
-  Association-based Boolean Matrix Factorization algorithm.
-  
-  This algorithm uses association rules to find basis vectors and greedily
-  selects factors based on coverage scoring.
-  """
   
   def __init__(self, rank: int = 5, tau: float = 0.8, wp: float = 1.0, wn: float = 1.0):
     """

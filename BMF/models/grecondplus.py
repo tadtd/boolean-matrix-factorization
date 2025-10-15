@@ -36,36 +36,22 @@ class GreConDPlus(BMFAlgorithm):
       if all(A[i, j] == 1 for i in objects):
         attributes.add(j)
     return attributes
-  
-  def gain(self, C: Set[int], D: Set[int], F: Set[int], candidate_attrs: Set[int],
+
+  def gain(self, C: Set[int], F: Set[int], candidate_attrs: Set[int],
            U: Set[Tuple[int, int]], O: Set[Tuple[int, int]],
            w: int) -> int:
     """
     Compute the gain of adding candidate attributes.
-    Args:
-      C: Current set of objects
-      D: Current set of attributes
-      F: Extra attributes added so far
-      candidate_attrs: Candidate attributes to evaluate
-      U: Universe of uncovered positive entries
-      O: Set of zero entries in A
-      w: Weight for false positives
-    Returns:
-      Gain score
     """
-    # D_F = D ∪ F
-    D_F = D | F
-    
-    # D_F_j = D_F ∪ candidate_attrs
-    D_F_j = D_F | candidate_attrs
-    
+    F_j = F | candidate_attrs
+
     # candidate = C × D_F_j (cartesian product)
-    candidate = {(i, j) for i in C for j in D_F_j}
+    candidate = {(i, j) for i in C for j in F_j}
     
-    # cover = candidate ∩ U
+    # cover = candidate ∩ U (true positives)
     cover = candidate & U
     
-    # undercover = candidate ∩ O
+    # undercover = candidate ∩ O (false positives)
     undercover = candidate & O
     
     score = len(cover) - w * len(undercover)
@@ -105,7 +91,7 @@ class GreConDPlus(BMFAlgorithm):
           continue
         
         # Compute gain(j)
-        g = self.gain(C, D, F, {j}, U, O, w)
+        g = self.gain(C, F, {j}, U, O, w)
         
         if g > best_gain:
           best_gain = g
@@ -129,8 +115,6 @@ class GreConDPlus(BMFAlgorithm):
     universe = {(i, j) for i in range(m) for j in range(n) if A[i, j] == 1}
     
     factor_id: int = 0
-    factor_update_id: int = 0
-    factor_remove_id: int = 0
 
     while universe:
       best_gain = 0
